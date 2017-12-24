@@ -13,8 +13,6 @@ services:
    - ./zbx_env/var/lib/zabbix/enc:/var/lib/zabbix/enc:ro
    - ./zbx_env/var/lib/zabbix/ssh_keys:/var/lib/zabbix/ssh_keys:ro
    - ./zbx_env/var/lib/zabbix/mibs:/var/lib/zabbix/mibs:ro
-  volumes_from:
-   - zabbix-snmptraps:ro
   links:
    - mysql-server:mysql-server
   ulimits:
@@ -72,28 +70,11 @@ services:
    com.zabbix.dbtype: "mysql"
    com.zabbix.os: "alpine"
 
- zabbix-snmptraps:
-  image: zabbix/zabbix-snmptraps:ubuntu-3.2-latest
-  ports:
-   - "162:162/udp"
-  volumes:
-   - ./zbx_env/var/lib/zabbix/snmptraps:/var/lib/zabbix/snmptraps:rw
-  user: root
-  networks:
-   zbx_net:
-    aliases:
-     - zabbix-snmptraps
-  labels:
-   com.zabbix.description: "Zabbix snmptraps"
-   com.zabbix.company: "Zabbix SIA"
-   com.zabbix.component: "snmptraps"
-   com.zabbix.os: "ubuntu"
-
  mysql-server:
   image: mysql:5.7
-  # volumes_from:
-  #   - db_data_mysql
-  # volume_driver: local
+  volumes_from:
+    - db_data_mysql
+  volume_driver: local
   env_file:
    - .env_db_mysql
   user: root
@@ -105,10 +86,10 @@ services:
      - zabbix-database
      - mysql-database
 
- # db_data_mysql:
- #    image: busybox
- #    volumes:
- #    - ./zbx_env/var/lib/mysql:/var/lib/mysql:rw
+ db_data_mysql:
+    image: busybox
+    volumes:
+    - ./zbx_env/var/lib/mysql:/var/lib/mysql:rw
 
 networks:
   zbx_net:
